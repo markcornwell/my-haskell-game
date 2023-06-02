@@ -1,0 +1,60 @@
+name:                my-haskell-game
+version:             0.1.0.0
+github:              "markcornwell/my-haskell-game"
+license:             BSD3
+author:              "Mark R Cornwell"
+maintainer:          "mark.cornwell@me.com"
+copyright:           "Copyright (c) 2022 by Mark R. Cornwell, All Rights Reserved"
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Unknown
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/markcornwell/my-haskell-game#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- gloss
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+library:
+  source-dirs: src
+
+executables:
+  my-haskell-game-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - my-haskell-game
+
+tests:
+  my-haskell-game-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - my-haskell-game
