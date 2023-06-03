@@ -1,7 +1,6 @@
-module Main where
+module Main(main) where
 
-import Lib
-import Graphics.Gloss
+import MyLib
 
 main :: IO ()
 main = someFunction

@@ -1,4 +1,4 @@
-module Lib where
+module MyLib where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
@@ -22,13 +22,14 @@ circleRadius :: Float
 circleRadius = 50
 
 someFunction :: IO ()
-someFunction = playIO (InWindow "My Haskell Game" (windowWidth, windowHeight) (100, 100)) -- Window settings
-                      white                    -- Background color
-                      60                       -- Frames per second
-                      initialState             -- Initial game state
-                      drawGame                 -- Function to draw the game
-                      handleEvent              -- Function to handle events
-                      updateGame               -- Function to update the game state
+someFunction = playIO
+    (InWindow "My Haskell Game" (windowWidth, windowHeight) (100, 100)) -- Window settings
+    white                    -- Background color
+    60                       -- Frames per second
+    initialState             -- Initial game state
+    drawGame                 -- Function to draw the game
+    handleEvent              -- Function to handle events
+    updateGame               -- Function to update the game state
 
 initialState :: GameState
 initialState = GameState
@@ -39,9 +40,8 @@ initialState = GameState
 
 drawGame :: GameState -> IO Picture
 drawGame gameState
-  | gameMode gameState == SquareMode = return (translateX (circlePos gameState)) -- Draw square in SquareMode
-  | gameMode gameState == CircleMode = return (renderCircle (circlePos gameState)) -- Draw circle in CircleMode
-
+    | gameMode gameState == SquareMode = return (translateX (circlePos gameState)) -- Draw square in SquareMode
+    | gameMode gameState == CircleMode = return (renderCircle (circlePos gameState)) -- Draw circle in CircleMode
 
 handleEvent :: Event -> GameState -> IO GameState
 handleEvent (EventKey (SpecialKey KeyEsc) Down _ _) _ = exitSuccess
@@ -74,10 +74,6 @@ clamp val lowerBound upperBound
 translateX :: Point -> Picture
 translateX (x, y) = translate x y (color red (rectangleSolid 100 100))
 
-render :: GameState -> IO Picture
-render gameState
-    | gameMode gameState == SquareMode = return (translateX (circlePos gameState)) -- Draw square in SquareMode
-    | gameMode gameState == CircleMode = return (renderCircle (circlePos gameState)) -- Draw circle in CircleMode
-
 renderCircle :: Point -> Picture
 renderCircle (x, y) = translate x y $ color red $ circleSolid circleRadius
+
