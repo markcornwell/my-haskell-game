@@ -23,7 +23,7 @@ render = do
   count <- liftIO $ readIORef (counter state)
   liftIO $ putStrLn $ "Counter: " ++ show count
 
--- Example state transformation function
+-- Example state transformation function:q
 stateTransformation :: App ()
 stateTransformation = do
   incrementCounter
