@@ -42,6 +42,7 @@ packages:
 #
 extra-deps:
 - mtl-2.2.2
+- gloss-1.13.1.2
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

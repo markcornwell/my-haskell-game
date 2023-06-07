@@ -11,6 +11,13 @@ packages:
       size: 1713
   original:
     hackage: mtl-2.2.2
+- completed:
+    hackage: gloss-1.13.1.2@sha256:25badaef6c8bfe92605310f9810be94074bdc63f00ffa7c85bf4c93825ba8e6b,4104
+    pantry-tree:
+      sha256: 926a8265fd7a696f8784a7cfc9d638f51edee1aebacb19bda7f71dc5dfbaeee0
+      size: 3807
+  original:
+    hackage: gloss-1.13.1.2
 snapshots:
 - completed:
     sha256: 4c972e067bae16b95961dbfdd12e07f1ee6c8fffabbfa05c3d65100b03f548b7
