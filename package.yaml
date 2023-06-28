@@ -25,6 +25,7 @@ dependencies:
 - gloss-juicy
 - FTGL >= 2.1 && < 3
 - JuicyPixels
+- bytestring >= 0.11 && < 1
 
 ghc-options:
 - -Wall

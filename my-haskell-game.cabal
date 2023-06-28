@@ -35,6 +35,7 @@ library
       FTGL >=2.1 && <3
     , JuicyPixels
     , base >=4.7 && <5
+    , bytestring >=0.11 && <1
     , gloss
     , gloss-juicy
   default-language: Haskell2010
@@ -50,6 +51,7 @@ executable my-haskell-game-exe
       FTGL >=2.1 && <3
     , JuicyPixels
     , base >=4.7 && <5
+    , bytestring >=0.11 && <1
     , gloss
     , gloss-juicy
     , my-haskell-game
@@ -67,6 +69,7 @@ test-suite my-haskell-game-test
       FTGL >=2.1 && <3
     , JuicyPixels
     , base >=4.7 && <5
+    , bytestring >=0.11 && <1
     , gloss
     , gloss-juicy
     , my-haskell-game

@@ -45,6 +45,7 @@ extra-deps:
 - gloss-juicy-0.2.3
 - FTGL-2.1
 - JuicyPixels-3.3.7
+- bytestring-0.11.4.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

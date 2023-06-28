@@ -25,6 +25,13 @@ packages:
       size: 2724
   original:
     hackage: JuicyPixels-3.3.7
+- completed:
+    hackage: bytestring-0.11.4.0@sha256:55390b63bbd7846aab6b16b7b255cf5108a3a422798a1e9a3b674eb0c68ac20c,7491
+    pantry-tree:
+      sha256: 316f6236418a55418c760077f59e5e6e46d969e7601c833e0d87cd6dfb90e42d
+      size: 4019
+  original:
+    hackage: bytestring-0.11.4.0
 snapshots:
 - completed:
     sha256: 4c972e067bae16b95961dbfdd12e07f1ee6c8fffabbfa05c3d65100b03f548b7

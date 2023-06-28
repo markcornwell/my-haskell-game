@@ -1,15 +1,22 @@
-module MyLib where
+module MyLib 
+    ( someFunction
+    ) where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
+import Graphics.Gloss.Juicy
 import System.Exit (exitSuccess)
+-- import qualified Data.ByteString as ByteString
 
-data GameMode = SquareMode | CircleMode deriving Eq
+
+
+data GameMode = SquareMode | CircleMode | TextMode deriving Eq
 
 data GameState = GameState
     { circlePos :: Point      -- Position of the circle
     , circleVel :: Vector     -- Velocity of the circle
     , gameMode :: GameMode    -- Current game mode (SquareMode or CircleMode)
+    , font :: Maybe Picture   -- Holds a picture of the fonts
     }
 
 windowWidth :: Int
@@ -21,32 +28,55 @@ windowHeight = 600
 circleRadius :: Float
 circleRadius = 50
 
+fontPath :: String
+fontPath = "assets/alphanumeric.png"
+
 someFunction :: IO ()
-someFunction = playIO
-    (InWindow "My Haskell Game" (windowWidth, windowHeight) (100, 100)) -- Window settings
-    white                    -- Background color
-    60                       -- Frames per second
-    initialState             -- Initial game state
-    drawGame                 -- Function to draw the game
-    handleEvent              -- Function to handle events
-    updateGame               -- Function to update the game state
+someFunction = do
+    myfont <- loadJuicyPNG fontPath
+    case myfont of
+        Just _ -> do
+            let state = initialState { font = myfont }
+            playIO
+                (InWindow "My Haskell Game" (windowWidth, windowHeight) (100, 100)) -- Window settings
+                white                    -- Background color
+                60                       -- Frames per second
+                state                    -- Initial game state
+                drawGame                 -- Function to draw the game
+                handleEvent              -- Function to handle events
+                updateGame               -- Function to update the game state
+        Nothing -> error $ "missing font file: " ++ fontPath
 
 initialState :: GameState
 initialState = GameState
     { circlePos = (0, 0)
     , circleVel = (100, 100)
-    , gameMode = SquareMode  -- Start with SquareMode
+    , gameMode = TextMode 
+    , font = Nothing
     }
 
+{-
 drawGame :: GameState -> IO Picture
 drawGame gameState
     | gameMode gameState == SquareMode = return (translateX (circlePos gameState)) -- Draw square in SquareMode
     | gameMode gameState == CircleMode = return (renderCircle (circlePos gameState)) -- Draw circle in CircleMode
+-}
+
+drawGame :: GameState -> IO Picture
+drawGame gameState = do 
+    case gameMode gameState of 
+        SquareMode -> return (translateX (circlePos gameState)) -- Draw square in SquareMode
+        CircleMode -> return (renderCircle (circlePos gameState)) -- Draw circle in CircleMode
+        TextMode -> case font gameState of 
+                        Nothing -> error "the impossible happended"
+                        Just image -> return image
+
 
 handleEvent :: Event -> GameState -> IO GameState
 handleEvent (EventKey (SpecialKey KeyEsc) Down _ _) _ = exitSuccess
 handleEvent (EventKey (Char 'c') Down _ _) gameState = return gameState { gameMode = CircleMode } -- Switch to CircleMode
 handleEvent (EventKey (Char 's') Down _ _) gameState = return gameState { gameMode = SquareMode } -- Switch to SquareMode
+handleEvent (EventKey (Char 't') Down _ _) gameState = return gameState { gameMode = TextMode } -- Switch to SquareMode
 handleEvent _ gameState = return gameState
 
 updateGame :: Float -> GameState -> IO GameState
@@ -54,7 +84,7 @@ updateGame deltaTime gameState = do
     let circlePos'@(x, y) = moveCircle (circleVel gameState) deltaTime (circlePos gameState)
         (minX, minY) = (-fromIntegral windowWidth / 2 + circleRadius, -fromIntegral windowHeight / 2 + circleRadius)
         (maxX, maxY) = ( fromIntegral windowWidth / 2 - circleRadius,  fromIntegral windowHeight / 2 - circleRadius)
-        circleVel'@(vx, vy) = if x < minX || x > maxX then (-fst (circleVel gameState), snd (circleVel gameState)) else circleVel gameState
+        circleVel'@(_vx, _vy) = if x < minX || x > maxX then (-fst (circleVel gameState), snd (circleVel gameState)) else circleVel gameState
         circleVel'' = if y < minY || y > maxY then (fst circleVel', -snd circleVel') else circleVel'
     return gameState { circlePos = clampPoint circlePos' (minX, minY) (maxX, maxY), circleVel = circleVel'' }
 
@@ -76,4 +106,10 @@ translateX (x, y) = translate x y (color red (rectangleSolid 100 100))
 
 renderCircle :: Point -> Picture
 renderCircle (x, y) = translate x y $ color red $ circleSolid circleRadius
+
+
+
+
+
+
 
