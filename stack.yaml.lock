@@ -3,7 +3,28 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: gloss-juicy-0.2.3@sha256:0c3bca95237cbf91f8b3b1936a0661f1e0457acd80502276d54d6c5210f88b25,1618
+    pantry-tree:
+      sha256: 914c08509bc3da4707d90e542b44833ca1a62abc83c2848f87df3d7a7a1d7e03
+      size: 273
+  original:
+    hackage: gloss-juicy-0.2.3
+- completed:
+    hackage: FTGL-2.1@sha256:299c20bb73653bf7047e3103375aac800653eb6b0dc9e69aaf3e1ac3180ce8ca,842
+    pantry-tree:
+      sha256: 9e5876a83f8b798b4f7ecc282c796d71caac7a6fbca71459cd2725fd0ba9cbf1
+      size: 215
+  original:
+    hackage: FTGL-2.1
+- completed:
+    hackage: JuicyPixels-3.3.7@sha256:6b77f89b0ca5655981a5603e68a266fc44112de853c76ab9b36ba69366db363b,3911
+    pantry-tree:
+      sha256: 264526c51dbfeb048d791f8d3380b5938e15f3b4128395351319492a7c924bc8
+      size: 2724
+  original:
+    hackage: JuicyPixels-3.3.7
 snapshots:
 - completed:
     sha256: 4c972e067bae16b95961dbfdd12e07f1ee6c8fffabbfa05c3d65100b03f548b7
