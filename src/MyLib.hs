@@ -8,7 +8,13 @@ import Graphics.Gloss.Juicy
 import System.Exit (exitSuccess)
 -- import qualified Data.ByteString as ByteString
 
+{- image stuff starts here -}
+import Codec.BMP
+import Graphics.Gloss.Data.Bitmap (BitmapData(..))
 
+
+
+{- end of image stuff -}
 
 data GameMode = SquareMode | CircleMode | TextMode deriving Eq
 
@@ -29,14 +35,19 @@ circleRadius :: Float
 circleRadius = 50
 
 fontPath :: String
-fontPath = "assets/alphanumeric.png"
+fontPath = "assets/myFont.bmp"
 
 someFunction :: IO ()
 someFunction = do
-    myfont <- loadJuicyPNG fontPath
-    case myfont of
-        Just _ -> do
-            let state = initialState { font = myfont }
+    -- myfont <- loadJuicyPNG fontPath
+    myBMP <- safeLoadBMP fontPath
+    case myBMP of
+        Nothing -> error "Missing or corrupted font file"
+        Just bmp -> do
+            let myData = bitmapDataOfBMP bmp
+            let myRect = Rectangle { rectPos = (0,0), rectSize = (500,520)}
+            let myPict = BitmapSection myRect myData
+            let state = initialState { font = Just myPict }
             playIO
                 (InWindow "My Haskell Game" (windowWidth, windowHeight) (100, 100)) -- Window settings
                 white                    -- Background color
@@ -45,7 +56,13 @@ someFunction = do
                 drawGame                 -- Function to draw the game
                 handleEvent              -- Function to handle events
                 updateGame               -- Function to update the game state
-        Nothing -> error $ "missing font file: " ++ fontPath
+
+safeLoadBMP :: String -> IO (Maybe BMP)
+safeLoadBMP path = do
+  either <- readBMP path
+  case either of 
+    Left msg -> pure Nothing
+    Right bmp -> pure $ Just bmp
 
 initialState :: GameState
 initialState = GameState

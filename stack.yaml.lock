@@ -32,6 +32,13 @@ packages:
       size: 4019
   original:
     hackage: bytestring-0.11.4.0
+- completed:
+    hackage: bmp-1.2.6.3@sha256:93901b0e0e13bd729207eca5963bbd4eb95ebbcd74f13c5646bb7cd7e91c0c3e,1395
+    pantry-tree:
+      sha256: 6d6663a230b1e498b5030594d1dd0393c9ec78011e755d875c4eb3dce9ac58f6
+      size: 882
+  original:
+    hackage: bmp-1.2.6.3
 snapshots:
 - completed:
     sha256: 4c972e067bae16b95961dbfdd12e07f1ee6c8fffabbfa05c3d65100b03f548b7
