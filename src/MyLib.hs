@@ -6,15 +6,9 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import Graphics.Gloss.Juicy
 import System.Exit (exitSuccess)
--- import qualified Data.ByteString as ByteString
 
-{- image stuff starts here -}
 import Codec.BMP
 import Graphics.Gloss.Data.Bitmap (BitmapData(..))
-
-
-
-{- end of image stuff -}
 
 data GameMode = SquareMode | CircleMode | TextMode deriving Eq
 
