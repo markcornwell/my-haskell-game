@@ -18,13 +18,14 @@ data GameState = GameState
     , gameMode :: GameMode    -- Current game mode (SquareMode or CircleMode)
     , fontPic :: Maybe Picture   -- Holds a picture of the fonts
     , font :: Font
+    , flyingChar :: Int
     }
 
 data Font = Font
     { fontData :: BitmapData
     , fontOriginX :: Int
     , fontOriginY :: Int
-    , fontRows :: Int  -- starting at row 0
+    , fontRows :: Int  -- starting at row 0 .. fontRows -1
     , fontCols :: Int  -- starting at col 0
     , fixed :: Bool  -- true if fixed width font
     , fontCharHeight :: Int  -- character height in fontData
@@ -35,6 +36,8 @@ fontCharPicture :: Font -> Int -> Picture
 fontCharPicture font i = 
     bitmapSection (fontCharRect font i) (fontData font)  -- is this picture centered at (0,0) ?
 
+
+
 -- | computes a rectangle around the ith character in the font 
 fontCharRect :: Font -> Int -> Rectangle
 fontCharRect font i =
@@ -42,12 +45,19 @@ fontCharRect font i =
         y0 = fontOriginY font
         h  = fontCharHeight font
         w  = fontCharWidth font
-        col = i `mod` fontCols font -- x position        
-        row = i `div` fontCols font -- y position
+        col = fontCol font i -- x position        
+        row = fontRow font i -- y position
     in
-        Rectangle { rectPos  = (x0 + w*col, y0 + h*row)
+        Rectangle { rectPos  = (x0 + w * col, y0 + h * row)
                   , rectSize = (w,h)
                   }
+
+fontCol :: Font -> Int -> Int
+fontCol f i = i `mod` fontCols f
+
+fontRow :: Font -> Int -> Int
+fontRow f i = fontRows f - i `div` fontCols f - 1
+
 
 initFont :: String -> IO (Maybe Font)
 initFont path = do
@@ -55,13 +65,13 @@ initFont path = do
     case maybeBMP of 
         Just bmp -> pure $
             Just Font { fontData = bitmapDataOfBMP bmp
-                      , fontOriginX = 0
-                      , fontOriginY = 0
+                      , fontOriginX = 15
+                      , fontOriginY = 15
                       , fontRows = 6
                       , fontCols = 11
                       , fixed = True
-                      , fontCharHeight = 100
-                      , fontCharWidth  = 60
+                      , fontCharHeight = 85
+                      , fontCharWidth  = 40
                       }
         Nothing -> pure Nothing 
 
@@ -111,9 +121,10 @@ safeLoadBMP path = do
 initialState :: GameState
 initialState = GameState
     { circlePos = (0, 0)
-    , circleVel = (100, 100)
+    , circleVel = (0,0) -- was (100, 100)
     , gameMode = TextMode 
     , fontPic = Nothing
+    , flyingChar = 0
     }
 
 {-
@@ -131,7 +142,8 @@ drawGame gameState = do
         TextMode -> case fontPic gameState of 
                         Nothing -> error "the impossible happended"
                         Just image -> return image
-        FontMode -> return (renderFontChar (font gameState) 0 (circlePos gameState))
+                        -- Just image -> return $ pictures [ image, renderFontCharGrid (font gameState) ]
+        FontMode -> return (renderFontChar (font gameState) (flyingChar gameState) (circlePos gameState))
 --        FontMode -> return (renderChar circlePos)
 
 
@@ -141,6 +153,10 @@ handleEvent (EventKey (Char 'c') Down _ _) gameState = return gameState { gameMo
 handleEvent (EventKey (Char 's') Down _ _) gameState = return gameState { gameMode = SquareMode } 
 handleEvent (EventKey (Char 't') Down _ _) gameState = return gameState { gameMode = TextMode }
 handleEvent (EventKey (Char 'f') Down _ _) gameState = return gameState { gameMode = FontMode }
+handleEvent (EventKey (Char '0') Down _ _) gameState = return gameState { gameMode = FontMode , flyingChar = 0}
+handleEvent (EventKey (Char '1') Down _ _) gameState = return gameState { gameMode = FontMode , flyingChar = 1}
+handleEvent (EventKey (Char '+') Down _ _) gameState = return gameState { gameMode = FontMode , flyingChar = flyingChar gameState + 1}
+handleEvent (EventKey (Char '-') Down _ _) gameState = return gameState { gameMode = FontMode , flyingChar = flyingChar gameState - 1}
 handleEvent _ gameState = return gameState
 
 updateGame :: Float -> GameState -> IO GameState
@@ -172,10 +188,27 @@ renderCircle :: Point -> Picture
 renderCircle (x, y) = translate x y $ color red $ circleSolid circleRadius
 
 renderFontChar :: Font -> Int -> Point -> Picture 
-renderFontChar font i (x,y) = 
+renderFontChar f i (x,y) = 
     pictures 
-        [ translate x y $ fontCharPicture font i 
-        , translate x y $ rectangleWire (fromIntegral (fontCharWidth font ))
-                                        (fromIntegral (fontCharHeight font ))
+        [ translate x y $ fontCharPicture f i 
+        , translate x y $ rectangleWire (fromIntegral (fontCharWidth f ))
+                                        (fromIntegral (fontCharHeight f ))
+        , translate (x + 50) (y + 50) 
+            $ scale 0.25 0.25 
+            $ text $ show i ++ "  c" ++ show (fontCol f i )++ "r" ++ show (fontRow f i)
         ]
 
+renderFontCharBox :: Font -> Int -> Picture
+renderFontCharBox font i = 
+    let (x,y) = rectPos  $ fontCharRect font i
+        (h,w) = rectSize $ fontCharRect font i
+    in 
+       translate (fromIntegral x) (fromIntegral y) 
+       $ rectangleWire (fromIntegral (fontCharWidth font ))
+                                     (fromIntegral (fontCharHeight font ))
+
+renderFontCharGrid :: Font -> Picture
+renderFontCharGrid f =
+    let n = fontRows f * fontCols f - 1
+    in
+        pictures $ map (renderFontCharBox f) [0..n]
