@@ -10,14 +10,60 @@ import System.Exit (exitSuccess)
 import Codec.BMP
 import Graphics.Gloss.Data.Bitmap (BitmapData(..))
 
-data GameMode = SquareMode | CircleMode | TextMode deriving Eq
+data GameMode = SquareMode | CircleMode | TextMode | FontMode deriving Eq
 
 data GameState = GameState
     { circlePos :: Point      -- Position of the circle
     , circleVel :: Vector     -- Velocity of the circle
     , gameMode :: GameMode    -- Current game mode (SquareMode or CircleMode)
-    , font :: Maybe Picture   -- Holds a picture of the fonts
+    , fontPic :: Maybe Picture   -- Holds a picture of the fonts
+    , font :: Font
     }
+
+data Font = Font
+    { fontData :: BitmapData
+    , fontOriginX :: Int
+    , fontOriginY :: Int
+    , fontRows :: Int  -- starting at row 0
+    , fontCols :: Int  -- starting at col 0
+    , fixed :: Bool  -- true if fixed width font
+    , fontCharHeight :: Int  -- character height in fontData
+    , fontCharWidth  :: Int  -- character width in fontData
+    }
+
+fontCharPicture :: Font -> Int -> Picture
+fontCharPicture font i = 
+    bitmapSection (fontCharRect font i) (fontData font)  -- is this picture centered at (0,0) ?
+
+-- | computes a rectangle around the ith character in the font 
+fontCharRect :: Font -> Int -> Rectangle
+fontCharRect font i =
+    let x0 = fontOriginX font
+        y0 = fontOriginY font
+        h  = fontCharHeight font
+        w  = fontCharWidth font
+        col = i `mod` fontCols font -- x position        
+        row = i `div` fontCols font -- y position
+    in
+        Rectangle { rectPos  = (x0 + w*col, y0 + h*row)
+                  , rectSize = (w,h)
+                  }
+
+initFont :: String -> IO (Maybe Font)
+initFont path = do
+    maybeBMP <- safeLoadBMP fontPath
+    case maybeBMP of 
+        Just bmp -> pure $
+            Just Font { fontData = bitmapDataOfBMP bmp
+                      , fontOriginX = 0
+                      , fontOriginY = 0
+                      , fontRows = 6
+                      , fontCols = 11
+                      , fixed = True
+                      , fontCharHeight = 100
+                      , fontCharWidth  = 60
+                      }
+        Nothing -> pure Nothing 
 
 windowWidth :: Int
 windowWidth = 800
@@ -34,14 +80,18 @@ fontPath = "assets/myFont.bmp"
 someFunction :: IO ()
 someFunction = do
     -- myfont <- loadJuicyPNG fontPath
-    myBMP <- safeLoadBMP fontPath
-    case myBMP of
+    maybeFont <- initFont fontPath
+    -- myBMP <- safeLoadBMP fontPath
+    -- case myBMP of
+    case maybeFont of
         Nothing -> error "Missing or corrupted font file"
-        Just bmp -> do
-            let myData = bitmapDataOfBMP bmp
+        -- Just bmp -> do
+        Just theFont -> do
+            -- let myData = bitmapDataOfBMP bmp
+            let myData = fontData theFont
             let myRect = Rectangle { rectPos = (0,0), rectSize = (500,520)}
             let myPict = BitmapSection myRect myData
-            let state = initialState { font = Just myPict }
+            let state = initialState { fontPic = Just myPict , font = theFont }
             playIO
                 (InWindow "My Haskell Game" (windowWidth, windowHeight) (100, 100)) -- Window settings
                 white                    -- Background color
@@ -63,7 +113,7 @@ initialState = GameState
     { circlePos = (0, 0)
     , circleVel = (100, 100)
     , gameMode = TextMode 
-    , font = Nothing
+    , fontPic = Nothing
     }
 
 {-
@@ -78,16 +128,19 @@ drawGame gameState = do
     case gameMode gameState of 
         SquareMode -> return (translateX (circlePos gameState)) -- Draw square in SquareMode
         CircleMode -> return (renderCircle (circlePos gameState)) -- Draw circle in CircleMode
-        TextMode -> case font gameState of 
+        TextMode -> case fontPic gameState of 
                         Nothing -> error "the impossible happended"
                         Just image -> return image
+        FontMode -> return (renderFontChar (font gameState) 0 (circlePos gameState))
+--        FontMode -> return (renderChar circlePos)
 
 
 handleEvent :: Event -> GameState -> IO GameState
 handleEvent (EventKey (SpecialKey KeyEsc) Down _ _) _ = exitSuccess
-handleEvent (EventKey (Char 'c') Down _ _) gameState = return gameState { gameMode = CircleMode } -- Switch to CircleMode
-handleEvent (EventKey (Char 's') Down _ _) gameState = return gameState { gameMode = SquareMode } -- Switch to SquareMode
-handleEvent (EventKey (Char 't') Down _ _) gameState = return gameState { gameMode = TextMode } -- Switch to SquareMode
+handleEvent (EventKey (Char 'c') Down _ _) gameState = return gameState { gameMode = CircleMode } 
+handleEvent (EventKey (Char 's') Down _ _) gameState = return gameState { gameMode = SquareMode } 
+handleEvent (EventKey (Char 't') Down _ _) gameState = return gameState { gameMode = TextMode }
+handleEvent (EventKey (Char 'f') Down _ _) gameState = return gameState { gameMode = FontMode }
 handleEvent _ gameState = return gameState
 
 updateGame :: Float -> GameState -> IO GameState
@@ -118,9 +171,11 @@ translateX (x, y) = translate x y (color red (rectangleSolid 100 100))
 renderCircle :: Point -> Picture
 renderCircle (x, y) = translate x y $ color red $ circleSolid circleRadius
 
-
-
-
-
-
+renderFontChar :: Font -> Int -> Point -> Picture 
+renderFontChar font i (x,y) = 
+    pictures 
+        [ translate x y $ fontCharPicture font i 
+        , translate x y $ rectangleWire (fromIntegral (fontCharWidth font ))
+                                        (fromIntegral (fontCharHeight font ))
+        ]
 
