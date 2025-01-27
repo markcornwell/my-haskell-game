@@ -1,3 +1,5 @@
+{-# OPTIONS -Wall -fno-warn-type-defaults -fno-ignore-asserts #-}
+
 module MyLib
     ( someFunction
     ) where
@@ -250,3 +252,4 @@ renderFontCharGrid f =
     let n = fontRows f * fontCols f - 1
     in
         pictures $ map (renderFontCharBox f) [0..n]
+
